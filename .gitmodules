@@ -1,0 +1,3 @@
+[submodule "DATA_Science_PROJECT_AirQuality_France"]
+	path = DATA_Science_PROJECT_AirQuality_France
+	url = https://github.com/longeacc/DATA_Science_PROJECT_AirQuality_France.git
