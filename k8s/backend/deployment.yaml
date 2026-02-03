@@ -22,8 +22,8 @@ spec:
     spec:
       containers:
         - name: backend
-          image: ${DOCKER_REGISTRY}/air-quality-backend:latest
-          imagePullPolicy: Always
+          image: air-quality-backend:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 8000
               name: http

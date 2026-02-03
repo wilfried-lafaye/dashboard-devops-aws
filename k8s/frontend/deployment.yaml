@@ -35,8 +35,8 @@ spec:
       
       containers:
         - name: frontend
-          image: username/air-quality-frontend:latest
-          imagePullPolicy: Always
+          image: air-quality-frontend:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 80
               protocol: TCP
