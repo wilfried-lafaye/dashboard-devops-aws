@@ -57,6 +57,15 @@ services:
     volumes:
       # Mount pour hot-reload en dev
       - ./backend/app:/app/app:ro
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/app
+          target: /app/app
+          ignore:
+            - __pycache__/
+        - action: rebuild
+          path: ./backend/requirements.txt
 
   # =============================================================================
   # Frontend (Nginx + Static Files)
@@ -78,6 +87,14 @@ services:
     networks:
       - airquality-network
     restart: unless-stopped
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./frontend
+          target: /usr/share/nginx/html
+          ignore:
+            - Dockerfile
+            - nginx.conf
 
 # =============================================================================
 # Volumes
