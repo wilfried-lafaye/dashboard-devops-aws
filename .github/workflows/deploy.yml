@@ -5,7 +5,7 @@ on:
     branches: [ main ]  # Se déclenche quand tu pousses sur la branche main
 
 env:
-  AWS_REGION: eu-west-3                   # Ta région (Paris)
+  AWS_REGION: eu-north-1                # Ta région (Paris)
   ECR_REPOSITORY: pollution-dashboard     # Le nom de ton repo ECR créé sur AWS
 
 jobs:
