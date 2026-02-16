@@ -1,0 +1,13 @@
+pandas==2.1.1
+numpy==1.26.4
+requests==2.32.0
+matplotlib>=3.7
+seaborn>=0.12
+scikit-learn>=1.2
+plotly==5.17.0
+geopandas==1.1.1
+dash==3.3.0
+folium>=0.14
+flask
+psycopg2-binary
+gunicorn

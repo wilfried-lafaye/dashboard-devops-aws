@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: air-quality
-  labels:
-    app.kubernetes.io/name: air-quality
-    app.kubernetes.io/part-of: air-quality-dashboard

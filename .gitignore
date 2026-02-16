@@ -1,0 +1,8 @@
+﻿.venv/
+__pycache__/
+data/
+output_csv/
+*.db
+*.csv
+.DS_Store
+pollution-dashboard.tar

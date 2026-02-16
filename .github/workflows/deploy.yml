@@ -1,0 +1,42 @@
+name: Deploy to AWS ECR
+
+on:
+  push:
+    branches: [ main ]  # Se déclenche quand tu pousses sur la branche main
+
+env:
+  AWS_REGION: eu-north-1                # Ta région (Paris)
+  ECR_REPOSITORY: pollution-dashboard     # Le nom de ton repo ECR créé sur AWS
+
+jobs:
+  
+  build-and-push:
+    name: Build Image & Push to ECR
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Récupérer le code
+      uses: actions/checkout@v3 
+      with:
+          lfs: true
+
+    - name: Configurer les identifiants AWS
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Connexion à Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Construction et Envoi de l'image Docker
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: latest
+      run: |
+        # 1. On construit l'image
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        # 2. On l'envoie chez AWS
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
