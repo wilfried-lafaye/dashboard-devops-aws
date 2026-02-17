@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Quartz build output
+public/
+
+# Local development
+.quartz-cache/
+*.log
+
+# Environment files
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Profiling
+prof/
+
+# Local Quartz launch script
+local-serve.sh
