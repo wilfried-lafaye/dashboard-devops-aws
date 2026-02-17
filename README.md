@@ -23,4 +23,4 @@ Run `npx quartz build --serve` to start the local server.
 ## ☁️ Deployment
 
 - **Air Quality Dashboard**: Deployed to **AWS (EKS)** via `.github/workflows/deploy-air-quality.yml`.
-- **Labs Documentation**: Deployed to **Cloudflare Pages** at [dashboard-devops-aws.pages.dev](https://dashboard-devops-aws.pages.dev) via `.github/workflows/deploy-labs-docs-cloudflare.yml`.
+- **Labs Documentation**: Deployed to **Cloudflare Pages** at [dashboard-devops-aws.pages.dev](https://dashboard-devops-aws.pages.dev) (Auto-deployed via Cloudflare/GitHub integration).
