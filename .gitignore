@@ -1,8 +1,24 @@
-﻿.venv/
+﻿# Python / Air Quality Dashboard
+.venv/
 __pycache__/
 data/
 output_csv/
 *.db
 *.csv
-.DS_Store
 pollution-dashboard.tar
+
+# Node.js / LLM Docs
+node_modules/
+public/
+.quartz-cache/
+*.log
+.env
+.env.local
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+prof/
+local-serve.sh
