@@ -38,6 +38,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: dashboard-devops-aws-automated
+          projectName: dashboard-devops-aws
           directory: apps/labs-docs/public
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
