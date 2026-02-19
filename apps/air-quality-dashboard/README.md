@@ -1,3 +1,338 @@
+# 🌍 Rapport Technique & Guide de Déploiement : Pollution Dashboard
+
+## 1. Résumé du Projet
+
+Ce projet consiste en la conception et le déploiement d'une application web orientée données (Dashboard de pollution) utilisant une architecture Cloud Native.
+
+L'objectif principal est de :
+
+- Mettre en place un pipeline CI/CD automatisé
+- Gérer des volumes de données importants via Git LFS
+- Déployer une infrastructure robuste sur AWS
+- Assurer la reproductibilité complète du projet
+
+L’application permet de visualiser des données géographiques de pollution stockées dans une base PostgreSQL et traitées via un backend Python (Flask/Dash).
+
+---
+
+## 2. Architecture Technique
+
+L'infrastructure repose sur Amazon Web Services (AWS) afin de garantir disponibilité, scalabilité et séparation des responsabilités.
+
+### Composants :
+
+- **Application** : Python (Flask/Dash) conteneurisée avec Docker
+- **Base de données** : AWS RDS (PostgreSQL)
+- **Registre d’images** : AWS ECR
+- **Serveur de déploiement** : AWS EC2 (t3.micro)
+- **Versioning données lourdes** : Git LFS (>800 Mo de CSV)
+
+Architecture logique :
+
+Utilisateur → EC2 (Docker Container) → RDS PostgreSQL  
+CI/CD → GitHub Actions → AWS ECR → EC2
+
+---
+
+## 3. Pipeline CI/CD (GitHub Actions)
+
+Déclenché automatiquement à chaque push sur la branche `main`.
+
+### Phase CI – Intégration Continue
+
+- Checkout du dépôt avec `lfs: true`
+- Récupération complète des fichiers CSV via Git LFS
+- Build Docker avec Dockerfile optimisé
+- Validation du build
+
+### Phase CD – Livraison Continue
+
+- Authentification sécurisée via GitHub Secrets
+- Push de l’image Docker taguée `latest` vers AWS ECR (région `eu-north-1`)
+
+---
+
+## 4. Prérequis
+
+Cette section liste l’ensemble des dépendances nécessaires pour reproduire le projet.
+
+---
+
+### 4.1 Prérequis Généraux
+
+- Git
+- Git LFS
+- Docker
+- Python 3 (pour test local hors container)
+- Compte GitHub
+- Accès Internet
+
+Vérification :
+
+```bash
+git --version
+git lfs --version
+docker --version
+python3 --version
+```
+
+---
+
+### 4.2 Déploiement Local (optionnel)
+
+- MicroK8s (si utilisation Kubernetes)
+- Minimum 4 Go RAM recommandé
+
+```bash
+microk8s status
+sudo microk8s kubectl version
+```
+
+---
+
+### 4.3 Prérequis AWS (Production)
+
+Compte AWS configuré avec :
+
+#### IAM
+- Access Key
+- Secret Access Key
+- Permissions suffisantes (AdministratorAccess ou équivalent restreint)
+
+#### Amazon RDS
+- Instance PostgreSQL (Free Tier)
+- Port 5432 ouvert
+- Security Group autorisant uniquement le Security Group de l’EC2
+
+⚠️ En production réelle, éviter `0.0.0.0/0`.
+
+#### Amazon ECR
+- Dépôt privé nommé `pollution-dashboard`
+
+#### Amazon EC2
+- Instance Amazon Linux 2023 (t3.micro)
+- Port 5000 ouvert dans le Security Group
+
+---
+
+## 5. Configuration Initiale
+
+### 5.1 Clonage du dépôt
+
+```bash
+git clone https://github.com/wilfried-lafaye/dashboard-devops-aws
+cd projet-pollution
+```
+
+### 5.2 Récupération des données lourdes (CRITIQUE)
+
+```bash
+git lfs install
+git lfs pull
+```
+
+Sans cette étape, l’application ne peut pas fonctionner.
+
+---
+---
+
+## 6. Déploiement Local avec MicroK8s (Kubernetes)
+
+Cette section permet de tester l’architecture Cloud Native en environnement local.
+
+---
+
+### 6.1 Préparation du Cluster
+
+C’est ici qu’on prépare l’environnement pour exécuter l’application.
+
+Démarrage du cluster :
+
+```bash
+sudo microk8s start
+```
+
+Activation des services essentiels (réseau + stockage) :
+
+```bash
+sudo microk8s enable dns storage
+```
+
+---
+
+### 6.2 Import de l’image Docker dans MicroK8s
+
+MicroK8s possède son propre registre interne.  
+Il faut donc transférer l’image depuis Docker.
+
+```bash
+docker save pollution-dashboard:local | sudo microk8s images import -
+```
+
+Vérification que l’image est bien présente :
+
+```bash
+sudo microk8s images ls | grep pollution
+```
+
+---
+
+### 6.3 Déploiement avec kubectl
+
+Lancement de l’application et de la base de données :
+
+```bash
+sudo microk8s kubectl apply -f k8s_app.yaml
+```
+
+Vérifier que les pods sont actifs :
+
+```bash
+sudo microk8s kubectl get pods
+```
+
+Les pods doivent être en état `Running`.
+
+Afficher les services exposés :
+
+```bash
+sudo microk8s kubectl get svc
+```
+
+Suppression d’un déploiement (reset propre) :
+
+```bash
+sudo microk8s kubectl delete deployment NOM_DU_DEPLOYMENT
+```
+
+---
+
+### 6.4 Vérification et Débogage
+
+Afficher les logs en temps réel :
+
+```bash
+sudo microk8s kubectl logs -f NOM_DU_POD
+```
+
+Très utile pour vérifier :
+- Connexion à la base PostgreSQL
+- Erreurs Python
+- Problèmes réseau
+
+---
+
+Tester si le service répond :
+
+```bash
+curl -I http://localhost:30007
+```
+
+Si la réponse est :
+
+```
+HTTP/1.1 200 OK
+```
+
+Alors l’application fonctionne.
+
+---
+
+### 6.5 Port Forward (Solution alternative)
+
+Si le NodePort ne fonctionne pas ou si le port est bloqué :
+
+```bash
+sudo microk8s kubectl port-forward service/dashboard-service 8080:80
+```
+
+Application accessible via :
+
+http://localhost:8080
+
+---
+
+
+
+## 7. Installation Docker sur EC2
+
+Connexion SSH :
+
+```bash
+ssh ec2-user@IP_PUBLIQUE
+```
+
+Installation Docker :
+
+```bash
+sudo yum update -y
+sudo yum install docker -y
+sudo systemctl start docker
+sudo usermod -aG docker ec2-user
+```
+
+Reconnecter la session SSH après ajout au groupe docker.
+
+---
+
+## 8. Build et Push vers AWS ECR
+
+Connexion à ECR :
+
+```bash
+aws ecr get-login-password --region eu-north-1 | \
+docker login --username AWS --password-stdin <account-id>.dkr.ecr.eu-north-1.amazonaws.com
+```
+
+Build image :
+
+```bash
+docker build -t pollution-dashboard .
+```
+
+Tag image :
+
+```bash
+docker tag pollution-dashboard:latest \
+<account-id>.dkr.ecr.eu-north-1.amazonaws.com/pollution-dashboard:latest
+```
+
+Push vers ECR :
+
+```bash
+docker push <account-id>.dkr.ecr.eu-north-1.amazonaws.com/pollution-dashboard:latest
+```
+
+---
+
+## 9. Lancement sur EC2
+
+```bash
+docker run -d -p 5000:5000 \
+-e DB_HOST=<rds-endpoint> \
+-e DB_USER=<username> \
+-e DB_PASSWORD=<password> \
+-e DB_NAME=<database> \
+pollution-dashboard
+```
+
+Application accessible via :
+
+http://<IP_PUBLIQUE_EC2>:5000/static/FINAL_dashboard.html
+
+---
+
+## 10. Contraintes Techniques
+
+- Volume CSV : ~800 Mo
+- Build Docker long (plusieurs minutes)
+- Kubernetes complet non viable sur t3.micro
+- Architecture adaptée au Free Tier AWS
+
+---
+
+
+
 # Air Quality Data Science Project - France (2000-2015)
 
 Interactive dashboard for analyzing historical reconstruction of background air pollution concentrations and regulatory indicators across France using a combined measurement and modeling approach.
