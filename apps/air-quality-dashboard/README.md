@@ -172,13 +172,20 @@ docker save pollution-dashboard:local | sudo microk8s images import -
 Vérification que l’image est bien présente :
 
 ```bash
-sudo microk8s images ls | grep pollution
+sudo microk8s ctr images ls | grep pollution
 ```
 
 ---
 
-### 6.3 Déploiement avec kubectl
-
+### 6.3 Déploiement avec kubectls
+Avant de lancer changer dans le fichier k8s si jamais vous vous êtes dans un premier temps connecté au cloud 
+```bash
+containers:
+      - name: dashboard
+        
+        image: pollution-dashboard:local
+        imagePullPolicy: Never
+```
 Lancement de l’application et de la base de données :
 
 ```bash
