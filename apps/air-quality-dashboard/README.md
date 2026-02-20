@@ -103,7 +103,10 @@ Compte AWS configuré avec :
 - Instance PostgreSQL (Free Tier)
 - Port 5432 ouvert
 - Security Group autorisant uniquement le Security Group de l’EC2
+- Le projet utilise une base de données PostgreSQL hébergée sur AWS RDS (Région eu-north-1).
+- Stockage (EBS) augmenté à 16 Go : Le volume de base par défaut d'AWS (8 Go) était insuffisant. L'image Docker du projet pesant environ 1.3 Go (incluant le dataset complet géré via Git LFS), le disque a été étendu à 16 Go pour permettre la construction, l'importation de l'image et le traitement des données sans saturer l'espace de stockage de l'instance.
 
+- Choix de l'orchestration (Docker vs K8s) : La RAM limitée à 1 Go sur l'instance t3.micro m'a poussé à déployer directement via Docker Run en production (AWS), réservant l'orchestration MicroK8s pour l'environnement de développement local.
 ⚠️ En production réelle, éviter `0.0.0.0/0`.
 
 #### Amazon ECR
